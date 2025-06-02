@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: flashloan-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    networks:
+      - flashloan-network
+
+  frontend:
+    build: ./frontend
+    container_name: flashloan-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
+    restart: unless-stopped
+    networks:
+      - flashloan-network
+
+  bot:
+    build: ./bot
+    container_name: flashloan-bot
+    environment:
+      - NODE_ENV=development
+      - TRAINING_MODE=true
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - flashloan-network
+
+  ai-trainer:
+    build: ./ai
+    container_name: flashloan-ai
+    volumes:
+      - ./data:/app/data
+      - ./ai/models:/app/models
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    networks:
+      - flashloan-network
+
+networks:
+  flashloan-network:
+    driver: bridge

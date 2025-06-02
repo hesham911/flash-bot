@@ -1,0 +1,19 @@
+{
+  "name": "flashloan-bot",
+  "version": "1.0.0",
+  "description": "FlashLoan Arbitrage Bot",
+  "main": "arbitrageBot.js",
+  "scripts": {
+    "start": "node arbitrageBot.js",
+    "test": "TRAINING_MODE=true node arbitrageBot.js",
+    "report": "node dailyReport.js"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "cron": "^2.3.1",
+    "node-telegram-bot-api": "^0.61.0",
+    "sqlite3": "^5.1.6"
+  }
+}

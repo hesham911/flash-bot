@@ -221,10 +221,11 @@ class ArbitrageBot {
 
         this.isRunning = false;
         console.log('🛑 Stopping Arbitrage Bot...');
-        await new Promise(resolve => {
+        await new Promise((resolve, reject) => {
             this.db.close(err => {
                 if (err) {
                     console.error('DB close error:', err.message);
+                    return reject(err);
                 }
                 resolve();
             });

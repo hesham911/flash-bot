@@ -24,6 +24,7 @@ class ArbitrageBot {
         this.provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
         const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, this.provider);
         this.contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, FLASHLOAN_ABI, wallet);
+        this.oneInchKey = process.env.ONEINCH_API_KEY;
 
         this.asset = process.env.USDC_ADDRESS;
         this.intermediate = process.env.USDT_ADDRESS;
@@ -36,13 +37,15 @@ class ArbitrageBot {
 
     async fetchUniswapPrice(amount) {
         const url = `https://api.1inch.io/v5.0/137/quote?fromTokenAddress=${this.asset}&toTokenAddress=${this.intermediate}&amount=${amount}&protocols=UNISWAP_V3`;
-        const res = await axios.get(url);
+        const headers = this.oneInchKey ? { Authorization: `Bearer ${this.oneInchKey}` } : {};
+        const res = await axios.get(url, { headers });
         return parseFloat(res.data.toTokenAmount);
     }
 
     async fetchSushiPrice(amount) {
         const url = `https://api.1inch.io/v5.0/137/quote?fromTokenAddress=${this.asset}&toTokenAddress=${this.intermediate}&amount=${amount}&protocols=SUSHI`;
-        const res = await axios.get(url);
+        const headers = this.oneInchKey ? { Authorization: `Bearer ${this.oneInchKey}` } : {};
+        const res = await axios.get(url, { headers });
         return parseFloat(res.data.toTokenAmount);
     }
 
@@ -125,8 +128,18 @@ class ArbitrageBot {
     }
 
     async stop() {
+        if (!this.isRunning) {
+            console.log('⏹️  Bot already stopped');
+            return;
+        }
+
         this.isRunning = false;
         console.log('🛑 Stopping Arbitrage Bot...');
+        this.db.close(err => {
+            if (err) {
+                console.error('DB close error:', err.message);
+            }
+        });
     }
 }
 

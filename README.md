@@ -68,6 +68,20 @@ docker-compose -f docker-compose.prod.yml up -d
 - [API Documentation](docs/api.md)
 - [Trading Strategies](docs/strategies.md)
 
+## 🔍 Pair Liquidity Analysis
+
+Use the analysis script to record pairs with strong liquidity and volume.
+
+```bash
+python3 analyzer/analyze_pairs.py
+```
+
+Schedule it hourly with cron:
+
+```cron
+0 * * * * /usr/bin/python3 /path/to/flash-bot/analyzer/analyze_pairs.py
+```
+
 ## 🎯 Success Metrics
 
 Ready for production when:

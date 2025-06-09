@@ -37,6 +37,7 @@ class ArbitrageBot {
         this.intermediate = process.env.USDT_ADDRESS;
         this.poolFee = parseInt(process.env.UNISWAP_FEE) || 3000; // 0.3%
 
+
         console.log('🤖 Arbitrage Bot initialized');
         console.log(`📊 Training Mode: ${this.config.trainingMode}`);
         console.log(`💰 Flash Loan Amount: $${this.config.flashloanAmount}`);
@@ -118,6 +119,15 @@ class ArbitrageBot {
             try {
                 if (this.config.trainingMode) {
                     console.log('🧠 Training mode: Scanning opportunities...');
+                const features = await this.gatherFeatures();
+                const predicted = await this.predictProfit(features);
+                await this.logPrediction(features, predicted);
+
+                if (!this.config.trainingMode && predicted >= this.config.minProfitPercent) {
+                    console.log(`✅ Predicted profit ${predicted.toFixed(2)}% \u2013 executing trade`);
+                    await this.executeTrade(features.amount);
+                } else {
+                    console.log(`❌ Predicted profit ${predicted.toFixed(2)}% below threshold`);
                 }
 
                 await this.checkAndExecute();
@@ -213,6 +223,13 @@ class ArbitrageBot {
             if (err) {
                 console.error('DB close error:', err.message);
             }
+        await new Promise(resolve => {
+            this.db.close(err => {
+                if (err) {
+                    console.error('DB close error:', err.message);
+                }
+                resolve();
+            });
         });
     }
 }

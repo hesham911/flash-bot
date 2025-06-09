@@ -16,6 +16,6 @@
 
 ### Security
 - `JWT_SECRET`: Secret for API authentication
-- `ADMIN_PASSWORD`: Dashboard admin password
+- `ADMIN_PASSWORD_HASH`: Bcrypt hashed dashboard password
 
 See `.env.example` for complete configuration.

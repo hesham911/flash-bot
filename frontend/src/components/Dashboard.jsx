@@ -7,7 +7,10 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await axios.get('/api/health');
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/health', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setStatus({ ...response.data, loading: false });
       } catch (error) {
         setStatus({ error: error.message, loading: false });

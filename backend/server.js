@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const ArbitrageBot = require('../bot/arbitrageBot');
@@ -31,6 +32,26 @@ const limiter = rateLimit({
     max: 100
 });
 app.use('/api/', limiter);
+
+// Login route
+app.post('/login', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const hash = process.env.ADMIN_PASSWORD_HASH;
+        if (!password || !hash) {
+            return res.status(400).json({ error: 'Invalid request' });
+        }
+        const match = await bcrypt.compare(password, hash);
+        if (!match) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const token = jwt.sign({ user: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 // JWT authentication
 function authenticateToken(req, res, next) {

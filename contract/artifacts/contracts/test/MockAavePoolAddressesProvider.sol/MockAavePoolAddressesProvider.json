@@ -1,0 +1,48 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MockAavePoolAddressesProvider",
+  "sourceName": "contracts/test/MockAavePoolAddressesProvider.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_poolAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "getPool",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newPoolAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setPoolAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60803461007357601f61018738819003918201601f19168301916001600160401b038311848410176100785780849260209460405283398101031261007357516001600160a01b0381169081900361007357600080546001600160a01b03191691909117905560405160f8908161008f8239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080806040526004361015601257600080fd5b600090813560e01c908163026b1d5f146094575063e9e15b4f14603457600080fd5b34609157602036600319011260915760043573ffffffffffffffffffffffffffffffffffffffff8116809103608d577fffffffffffffffffffffffff000000000000000000000000000000000000000082541617815580f35b5080fd5b80fd5b905034608d5781600319360112608d5773ffffffffffffffffffffffffffffffffffffffff60209254168152f3fea26469706673582212209a646d8b7e154e5b279489593884d1312a7707802298d39376601e5dbaf1551a64736f6c63430008130033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c908163026b1d5f146094575063e9e15b4f14603457600080fd5b34609157602036600319011260915760043573ffffffffffffffffffffffffffffffffffffffff8116809103608d577fffffffffffffffffffffffff000000000000000000000000000000000000000082541617815580f35b5080fd5b80fd5b905034608d5781600319360112608d5773ffffffffffffffffffffffffffffffffffffffff60209254168152f3fea26469706673582212209a646d8b7e154e5b279489593884d1312a7707802298d39376601e5dbaf1551a64736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

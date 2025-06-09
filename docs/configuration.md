@@ -11,6 +11,7 @@
 - `FLASHLOAN_AMOUNT`: Amount in USD (default: 5000)
 - `MIN_PROFIT_PERCENT`: Minimum profit threshold (default: 0.5)
 - `TRAINING_MODE`: Enable safe testing (default: true)
+- `STOP_LOSS_COUNT`: Consecutive failures before stopping (default: 3)
 
 ### Security
 - `JWT_SECRET`: Secret for API authentication

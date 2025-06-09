@@ -117,11 +117,13 @@ class ArbitrageBot {
     async runLoop() {
         while (this.isRunning) {
             try {
-                if (this.config.trainingMode) {
-                    console.log('🧠 Training mode: Scanning opportunities...');
                 const features = await this.gatherFeatures();
                 const predicted = await this.predictProfit(features);
-                await this.logPrediction(features, predicted);
+
+                if (this.config.trainingMode) {
+                    console.log('🧠 Training mode: Scanning opportunities...');
+                    await this.logPrediction(features, predicted);
+                }
 
                 if (!this.config.trainingMode && predicted >= this.config.minProfitPercent) {
                     console.log(`✅ Predicted profit ${predicted.toFixed(2)}% \u2013 executing trade`);
@@ -219,10 +221,6 @@ class ArbitrageBot {
 
         this.isRunning = false;
         console.log('🛑 Stopping Arbitrage Bot...');
-        this.db.close(err => {
-            if (err) {
-                console.error('DB close error:', err.message);
-            }
         await new Promise(resolve => {
             this.db.close(err => {
                 if (err) {

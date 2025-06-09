@@ -50,3 +50,11 @@ TRAINING_MODE=true
 ```
 
 Run for 48+ hours to collect data before production.
+
+### Liquidity Analysis
+
+Schedule the helper script to refresh pair data hourly:
+
+```cron
+0 * * * * /usr/bin/python3 /path/to/flash-bot/analyzer/analyze_pairs.py
+```

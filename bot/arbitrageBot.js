@@ -136,6 +136,14 @@ class ArbitrageBot {
     async stop() {
         this.isRunning = false;
         console.log('🛑 Stopping Arbitrage Bot...');
+        await new Promise(resolve => {
+            this.db.close(err => {
+                if (err) {
+                    console.error('DB close error:', err.message);
+                }
+                resolve();
+            });
+        });
     }
 }
 

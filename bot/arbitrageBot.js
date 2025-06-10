@@ -37,7 +37,11 @@ class ArbitrageBot {
 
         this.provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
         const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, this.provider);
+        this.wallet = wallet;
         this.contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, FLASHLOAN_ABI, wallet);
+        this.privateRelayUrl = process.env.PRIVATE_RELAY_URL || '';
+        this.useFlashbots = process.env.USE_FLASHBOTS === 'true';
+        this.relayProvider = this.privateRelayUrl ? new ethers.providers.JsonRpcProvider(this.privateRelayUrl) : null;
         this.oneInchKey = process.env.ONEINCH_API_KEY;
 
         this.asset = process.env.USDC_ADDRESS;
@@ -74,6 +78,32 @@ class ArbitrageBot {
         );
     }
 
+    async sendPrivate(rawTx) {
+        if (!this.relayProvider) {
+            return this.provider.sendTransaction(rawTx);
+        }
+        try {
+            if (this.useFlashbots) {
+                const block = await this.provider.getBlockNumber();
+                const params = [{ txs: [rawTx], blockNumber: ethers.utils.hexValue(block + 1) }];
+                return await this.relayProvider.send('eth_sendBundle', params);
+            }
+            return await this.relayProvider.sendTransaction(rawTx);
+        } catch (err) {
+            console.error('Private relay submission failed:', err.message);
+            return this.provider.sendTransaction(rawTx);
+        }
+    }
+
+    async executeFlashloanTx(amount, dex) {
+        const tx = await this.contract.populateTransaction.initiateFlashloan(this.asset, amount, dex, this.intermediate, this.poolFee);
+        tx.gasLimit = await this.provider.estimateGas(tx);
+        tx.gasPrice = await this.provider.getGasPrice();
+        await this.contract.callStatic.initiateFlashloan(this.asset, amount, dex, this.intermediate, this.poolFee, { gasLimit: tx.gasLimit });
+        const signed = await this.wallet.signTransaction(tx);
+        await this.sendPrivate(signed);
+    }
+
     async checkAndExecute() {
         const amount = ethers.utils.parseUnits(this.config.flashloanAmount, 6).toString();
         try {
@@ -88,7 +118,7 @@ class ArbitrageBot {
                 const profit = (diffPercent / 100) * parseFloat(this.config.flashloanAmount);
 
                 if (!this.config.trainingMode) {
-                    await this.contract.initiateFlashloan(this.asset, amount, dex, this.intermediate, this.poolFee);
+                    await this.executeFlashloanTx(amount, dex);
                 }
 
                 this.logTrade(`${this.asset}/${this.intermediate}`, this.config.flashloanAmount, profit, 'success');

@@ -6,6 +6,8 @@
 - `PRIVATE_KEY`: Your wallet private key
 - `ONEINCH_API_KEY`: 1inch API key for price quotes
 - `RPC_URL`: Polygon RPC endpoint
+- `PRIVATE_RELAY_URL`: Private relay RPC endpoint (e.g. Flashbots)
+- `USE_FLASHBOTS`: Set to `true` to send bundles via Flashbots
 
 ### Bot Settings
 - `FLASHLOAN_AMOUNT`: Amount in USD (default: 5000)

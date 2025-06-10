@@ -4,7 +4,7 @@ const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const { spawnSync } = require('child_process');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 
 const FLASHLOAN_ABI = [
     'function initiateFlashloan(address asset, uint256 amount, uint8 dex, address intermediate, uint24 fee)'

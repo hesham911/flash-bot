@@ -13,6 +13,9 @@
 - `TRAINING_MODE`: Enable safe testing (default: true)
 - `STOP_LOSS_COUNT`: Consecutive failures before stopping (default: 3)
 - `UNISWAP_FEE`: Uniswap V3 fee tier in basis points (default: 3000)
+- `DAILY_TRADE_CAP`: Maximum successful trades per day (default: 10)
+- `COOLDOWN_MINUTES`: Wait time before retrying failed pairs (default: 10)
+- `ACTIVE_HOURS`: Allowed UTC hours for trading, e.g. `1-6`
 
 ### Security
 - `JWT_SECRET`: Secret for API authentication

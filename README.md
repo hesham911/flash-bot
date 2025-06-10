@@ -82,6 +82,20 @@ Schedule it hourly with cron:
 0 * * * * /usr/bin/python3 /path/to/flash-bot/analyzer/analyze_pairs.py
 ```
 
+Generate a profitability ranking using logged trades:
+
+```bash
+python3 analyzer/rank_pairs.py
+```
+
+### Weekly AI Retraining
+
+Schedule the training script to run once per week to keep the model up to date:
+
+```cron
+0 3 * * 1 /usr/bin/python3 /path/to/flash-bot/train_model.py >> logs/train.log 2>&1
+```
+
 ## 🎯 Success Metrics
 
 Ready for production when:

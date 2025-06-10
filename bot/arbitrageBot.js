@@ -19,8 +19,15 @@ class ArbitrageBot {
             flashloanAmount: process.env.FLASHLOAN_AMOUNT || '5000',
             minProfitPercent: parseFloat(process.env.MIN_PROFIT_PERCENT) || 0.5,
             runInterval: parseInt(process.env.RUN_INTERVAL_SEC) || 12,
-            stopLoss: parseInt(process.env.STOP_LOSS_COUNT) || 3
+            stopLoss: parseInt(process.env.STOP_LOSS_COUNT) || 3,
+            dailyTradeCap: parseInt(process.env.DAILY_TRADE_CAP) || 10,
+            cooldownMinutes: parseInt(process.env.COOLDOWN_MINUTES) || 10,
+            activeHours: process.env.ACTIVE_HOURS || ''
         };
+
+        this.dailyTradeCount = 0;
+        this.currentDay = new Date().toISOString().slice(0, 10);
+        this.cooldownUntil = 0;
 
         this.dbPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'arbitrage.db');
         this.modelPath = path.join(__dirname, '..', 'ai', 'models', 'arbitrage_model.joblib');
@@ -86,6 +93,7 @@ class ArbitrageBot {
 
                 this.logTrade(`${this.asset}/${this.intermediate}`, this.config.flashloanAmount, profit, 'success');
                 this.failureCount = 0;
+                this.dailyTradeCount += 1;
             } else {
                 this.logTrade(`${this.asset}/${this.intermediate}`, this.config.flashloanAmount, 0, 'skipped');
             }
@@ -93,6 +101,7 @@ class ArbitrageBot {
             console.error('Trade error:', err.message);
             this.failureCount += 1;
             this.logTrade(`${this.asset}/${this.intermediate}`, this.config.flashloanAmount, 0, 'error');
+            this.cooldownUntil = Date.now() + this.config.cooldownMinutes * 60 * 1000;
 
             if (this.failureCount >= this.config.stopLoss) {
                 console.error('🚨 Stop loss triggered');
@@ -117,6 +126,24 @@ class ArbitrageBot {
     async runLoop() {
         while (this.isRunning) {
             try {
+                this.resetDailyCount();
+
+                if (!this.withinActiveHours()) {
+                    await this.sleep(60000);
+                    continue;
+                }
+
+                if (this.dailyTradeCount >= this.config.dailyTradeCap) {
+                    console.log('🚫 Daily trade cap reached');
+                    await this.sleep(60000);
+                    continue;
+                }
+
+                if (Date.now() < this.cooldownUntil) {
+                    await this.sleep(1000);
+                    continue;
+                }
+
                 const features = await this.gatherFeatures();
                 const predicted = await this.predictProfit(features);
 
@@ -144,6 +171,25 @@ class ArbitrageBot {
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    withinActiveHours() {
+        if (!this.config.activeHours) return true;
+        const [start, end] = this.config.activeHours.split('-').map(Number);
+        const hour = new Date().getUTCHours();
+        if (Number.isNaN(start) || Number.isNaN(end)) return true;
+        if (start <= end) {
+            return hour >= start && hour < end;
+        }
+        return hour >= start || hour < end;
+    }
+
+    resetDailyCount() {
+        const day = new Date().toISOString().slice(0, 10);
+        if (day !== this.currentDay) {
+            this.currentDay = day;
+            this.dailyTradeCount = 0;
+        }
     }
 
     async gatherFeatures() {

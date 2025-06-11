@@ -8,7 +8,7 @@ const Dashboard = () => {
     const fetchStatus = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/health', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/health`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStatus({ ...response.data, loading: false });

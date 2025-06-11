@@ -2,6 +2,7 @@
 const { ethers } = require('ethers');
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 const { spawnSync } = require('child_process');
 const path = require('path');
 require('dotenv').config({ path: '../.env' });
@@ -48,10 +49,26 @@ class ArbitrageBot {
         this.intermediate = process.env.USDT_ADDRESS;
         this.poolFee = parseInt(process.env.UNISWAP_FEE) || 3000; // 0.3%
 
+        this.tokenPairs = [];
+        this.loadTokenPairs();
+
 
         console.log('🤖 Arbitrage Bot initialized');
         console.log(`📊 Training Mode: ${this.config.trainingMode}`);
         console.log(`💰 Flash Loan Amount: $${this.config.flashloanAmount}`);
+    }
+
+    loadTokenPairs() {
+        const file = path.join(__dirname, '..', 'data', 'top_pairs.json');
+        try {
+            const raw = fs.readFileSync(file, 'utf8');
+            const data = JSON.parse(raw);
+            this.tokenPairs = Array.isArray(data.pairs) ? data.pairs : [];
+            console.log(`🔗 Loaded ${this.tokenPairs.length} token pairs`);
+        } catch (err) {
+            console.error('Failed to load token pairs:', err.message);
+            this.tokenPairs = [];
+        }
     }
 
     async fetchUniswapPrice(amount) {
@@ -189,7 +206,11 @@ class ArbitrageBot {
                     console.log(`❌ Predicted profit ${predicted.toFixed(2)}% below threshold`);
                 }
 
-                await this.checkAndExecute();
+                for (const pair of this.tokenPairs) {
+                    this.asset = pair.token0;
+                    this.intermediate = pair.token1;
+                    await this.checkAndExecute();
+                }
 
                 await this.sleep(this.config.runInterval * 1000);
             } catch (error) {
